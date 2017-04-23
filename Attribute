@@ -1,0 +1,44 @@
+class Attribute:
+    '''
+    The Attribute Class records RPG attributes and Saving Throw information as well as methods to check against these numbers
+    
+    The Class includes name, value, rules for generating, rules for checking against (rolling over or under), incrementing, 
+    applying modifiers to rolls, and recording modifiers caused by attributes on other skills and abilities.
+    
+    '''
+    def __init__(self, name, score=0, generate=['3d6'], bonus=0, check_die=['1d20'], check_under=True, mod_rules="fifthEd"):
+        '''
+        Creating the Attribute() variable
+    
+        The name is the display name of the Attribute for game purposes. The variable name will always be used to invoke the Attribute.
+        The score is the value of the named Attribute. It may be set at instantiation, or left zero. If zero, the score will be generated randomly.
+        generate is the die or dice required to generate this Attribute score. It is in Dice() format and should be a list of strings.
+        class_bonus allows the user to add class modifiers to each attribute, either positive or negative.
+        check is the die or dice used to check against the Attribute. It is in Dice() format and should be a list of strings.
+        check_under indicates how success is determined by the die roll. Default is success on a roll equal to or less than the score.
+        Modifiers are based on 5th edition D&D unless otherwise specified: attribute -10 then divide the result by 2 and round down.
+        '''    
+        from Dice import Dice
+        self.generate = Dice(generate)
+        self.check_die = Dice(check_die)
+        if score == 0:
+            self.score = self.generate.Roll() + bonus
+        else:
+            self.score = score
+        self.name = name
+        self.check_under = check_under
+        if mod_rules == "fifthEd":
+            self.modifier = int((self.score - 10)/2)
+        
+    def __str__(self):
+        return "%s %d (%d)" % (self.name, self.score, self.modifier)
+    
+    def Check(self):
+        '''
+        Returns 1 if successful, 0 if unsuccessful
+        '''
+        from Dice import Dice
+        return self.check_die.Target(self.score, under=self.check_under)
+    
+    def Modifier(self):
+        return self.modifier
