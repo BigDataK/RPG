@@ -1,0 +1,127 @@
+class Dice:
+    '''
+    This is a class specifically made to roll and calculate odds on any possible kind of die or group of dice.
+    '''
+    
+    def __init__(self, dice=[]):
+        '''
+        Creating the Dice() variable
+        
+        A Dice class object is created by assigning Dice(*args) to a variable. The *args are integers and will 
+        be split into two groups: d group is a list of all the dice (by number of faces), and n group is the 
+        number of the die type just identified. Arguments assigned to Dice() must always be in the form xdy,
+        where x is the number of dice and y is the number of faces on each die of that group. Dice will take any
+        number of dice in a list of strings.
+        '''
+        self.d = []
+        self.n = []
+        a = []
+        for die in dice:
+            a = die.split('d')
+            self.n.append(int(a[0]))
+            self.d.append(int(a[1]))
+        
+        #self.d = d = list(args[0::2]) #the d is for the number of sides for each die
+        #self.n = n = list(args[1::2]) #the n is for the number of dice of each type
+        #if len(d) > len(n):
+        #    n.append(0) #if there are more dice than numbers, append zero (there are zero of the last type of die)
+    
+    def __str__(self):
+        '''
+        Outputs the number and types of dice in the Dice() variable
+        
+        When printed, the user will see a list of dice in the format 3d6 where n is the 3 (the number of dice)
+        and 6 is the d (the number of sides on each die).
+        '''
+        output = ''
+        for idx, val in enumerate(self.d):
+            output += "%dd%d " % (self.n[idx], val)
+        output = output[:-1]
+        return output
+    
+    def ListMax(self):
+        '''
+        Outputs the maximum value of all dice in a list
+        '''
+        die_list = []
+        for idx, val in enumerate(self.d):
+            for j in range(self.n[idx]):
+                die_list.append(val)
+        return die_list
+    
+    def Results(self):
+        '''
+        Generates a list of all possible roll results
+        '''
+        x = self.ListMax()
+        y = self.ListMax()
+        output = []
+        
+        while sum(y) > len(y):
+            output.append(sum(y)) #sum all the values on all the die faces
+            for idx, val in enumerate(y): #for all the values in y
+                if val > 1: #if the value is larger than one (starting at the beginning)
+                    y[idx] -= 1 #then subtract one
+                    break #and get out
+                else: #however, if it is one
+                    y[idx] = x[idx] #re-set it to the original value, and proceed to the next index
+        output.append(len(y))
+        return output
+    
+    def Roll(self, sum_result=True):
+        '''
+        Rolls the dice and either sums the results or returns a list of individual results
+        
+        Default behaviour is to sum all rolls and output an integer.
+        If sum_result is set to False, the result will be a list of all individual die roll results.
+        '''
+        from random import randint
+        total = []
+        for idx, val in enumerate(self.d):
+            for p in range(self.n[idx]):
+                total.append(randint(1,val))
+            if sum_result == False:
+                return total
+            else:
+                return sum(total)
+    
+    def Mean(self):
+        input_list = sum(self.Results())
+        output = input_list/len(self.Results())
+        return output
+        
+    def Mode(self):
+        from collections import Counter
+        return Counter(self.Results()).most_common(1)[0]
+    
+    def Target(self, target, under=False, sum_or_not=True): #under is whether the die should roll under target and defaults to false
+        '''
+        Roll the dice and determine if the target number was hit.
+        
+        User may select a target that is rolled under or over. In all cases, a roll that equals the target returns 1.
+        To roll under a target number, set under to True. To roll over, use the default case.
+        Many dice can be rolled for a sum which is compared against a target. This is the default behaviour, and a successful roll returns 1.
+        Many dice can be rolled each to hit a given target, and each die will be compared to the target in turn. Returns the sum of successful rolls.
+        '''
+        x = self.Roll(sum_result=sum_or_not)
+        if type(x) is int:
+            x = [x]
+        for idx, val in enumerate(x):
+            if under is False:
+                if val >= target:
+                    x[idx] = 1
+                else:
+                    x[idx] = 0
+            else:
+                if val <= target:
+                    x[idx] = 1
+                else:
+                    x[idx] = 0
+        return sum(x)
+
+#def RollSum(self): #deprecated in favour of Roll()
+    #from random import randint
+    #total = 0
+    #for idx, val in enumerate(self.d):
+        #total += sum([randint(1,val) for p in range(self.n[idx])])
+    #return total
