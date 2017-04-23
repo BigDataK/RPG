@@ -1,0 +1,109 @@
+class Character:
+    '''
+    Character contains all information about a character in an RPG, including Attributes, skills, items, spells, and methods for character Generation
+    
+    '''
+    
+    def __init__(self, name, race='Human', att_list=['Strength', 'Intelligence', 'Dexterity', 'Wisdom', 'Constitution', 'Charisma'],\
+                 att_die=['3d6'], att_check_die=['1d20'], hit_dice=['1d8'], start_level = 1, start_xp = 0):
+        from Attribute import Attribute
+        from Dice import Dice
+        races = self.read_csv('races.csv')
+        self.name = name
+        self.race = race
+        self.class_type = ''
+        self.potential_class_types = []
+        self.hd = Dice(dice=hit_dice)
+        self.level = start_level
+        self.xp = start_xp
+        self.hit_points = 0
+        
+        
+        while len(self.potential_class_types) == 0: #player must be able to choose at least one class!
+            class_list = self.read_csv('classes.csv')
+            self.character_att = []
+            for idx, val in enumerate(att_list):
+                self.character_att.append(Attribute(name=val, score=0, bonus=self.find_data(races, race, val), check_die=att_check_die, check_under=True))    
+            self.potential_class_types = self.potential_classes(class_list)
+        
+        for digit in range(self.level):
+            self.hit_points += self.hd.Roll() + self.character_att[att_list.index("Constitution")].Modifier()
+            
+        if self.hit_points < 1:
+            self.hit_points = 1
+            
+        self.current_hp = self.hit_points
+        
+    def __str__(self):
+        char_stats = "Name: " + self.name + "\n" + "Race: " + self.race + "\n" + "Level: " + str(self.level) + "\n" + "Experience: "\
+            + str(self.xp) + "\n" + "HP: " + str(self.current_hp) + "/"+ str(self.hit_points) + "\n" 
+        for att in self.character_att:
+            char_stats += str(att) + "\n"
+        char_stats += "Possible Classes: " + '\n'.join(self.potential_class_types)
+        return char_stats
+    
+    def read_csv(self, file_name):
+        import csv  
+        datafile = open(file_name, 'r')
+        datareader = csv.reader(datafile,delimiter=',')
+        matrix = []
+        
+        for row in datareader:
+            matrix.append(row)
+        
+        return matrix
+
+    def find_data(self, matrix, row_name, col_name):
+        for idx, val in enumerate(matrix):
+            if val[0] == row_name:
+                x = idx        
+        for idx, val in enumerate(matrix[0]):
+            if val == col_name:
+                y = idx
+        return int(matrix[x][y])
+
+    def compare_lists(self, list1, list2):
+        target = 14 #minimum score for each prerequisite atribute for class or subclass
+        is_true = True
+        for idx, val in enumerate(list1):
+            if int(val)*target > list2[idx]:
+                is_true = False
+                break
+        return is_true
+
+    def potential_classes(self, matrix):
+        '''
+        List the potential classes that the character may be.
+        '''
+        potentials = []
+        char_scores = []
+        attribute_names = matrix.pop(0)
+        attribute_names = attribute_names[1:7]
+        for idx, val in enumerate(attribute_names):
+            char_scores.append(self.character_att[idx].score)
+        for idx, val in enumerate(matrix):
+            name = val.pop(0)
+            subclass = val.pop()
+            if self.compare_lists(val, char_scores) is True:
+                potentials.append(name)
+        return potentials
+    
+    def experience(self, xp):
+        '''
+        experience() method allows the adding of XP (and subtraction if a negative number is passed)
+        '''
+        self.experience += xp
+        
+    def cure(self, hp):
+        '''
+        cure adds to the player's hit points. Will not surpass max HP.
+        '''
+        self.current_hp += hp
+        if self.current_hp > self.hit_points:
+            self.current_hp = self.hit_points
+    
+    def damage(self, hp):
+        '''
+        damage inflicts damage on the player's current HP. 
+        '''
+        self.current_hp -= hp
