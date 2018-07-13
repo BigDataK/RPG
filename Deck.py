@@ -59,9 +59,8 @@ class Deck():
             #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             #append the arcana on to the end of the deck
             #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if len(arcana) > 0:
-                for idx, card in enumerate(arcana):
-                    self.deck_holder.append({"suit":card, "value":idx})
+            for idx, card in enumerate(arcana):
+                self.deck_holder.append({"suit":card, "value":idx})
             self.abs_value()
 
         self.current_order = list(range(len(self.deck_holder))) #current order is for shuffling, so the whole deck_holder does not have to be used
