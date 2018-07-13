@@ -3,7 +3,7 @@ class Deck():
     Deck contains all information about a deck of cards
     
     '''    
-    def __init__(self, name='English', suits=['Diamonds', 'Clubs', 'Hearts', 'Spades'],\
+    def __init__(self, name='French', suits=['Diamonds', 'Clubs', 'Hearts', 'Spades'],\
                  value_list=['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King'],\
                  arcana=['Joker', 'Joker'], suit_ranking=False, other_data=''):
         '''
